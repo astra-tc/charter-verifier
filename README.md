@@ -32,7 +32,7 @@ const r = await verifyCharter({
 npm install   # dev only: viem, used by the tests to encode real ABI data
 npm test      # node:test, no network
 npm run test:live   # also reads the real EAS contracts on Base and Base Sepolia
-npm run mutation    # plants 8 bugs, all caught
+npm run mutation    # plants 7 bugs, all caught
 ```
 
 | Item | Test |

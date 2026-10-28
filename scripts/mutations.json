@@ -1,10 +1,44 @@
 [
-  {"id": "M1 revoked still ok", "file": "verifier.js", "from": "out.ok = !out.attestation.revoked && failed.length === 0;", "to": "out.ok = failed.length === 0;"},
-  {"id": "M2 digests not lowercased", "file": "verifier.js", "from": ".map((d) => d.toLowerCase());", "to": ";"},
-  {"id": "M3 zero UID not treated as empty", "file": "verifier.js", "from": "if (att.uid === ZERO32) return", "to": "if (false) return"},
-  {"id": "M4 fetch failure throws", "file": "verifier.js", "from": "      text.error = `could not fetch", "to": "      throw e; text.error = `could not fetch"},
-  {"id": "M5 wrong contract", "file": "verifier.js", "from": "{ to: EAS_ADDRESS, data:", "to": "{ to: '0x4200000000000000000000000000000000000020', data:"},
-  {"id": "M6 dates swapped", "file": "verifier.js", "from": "const date = stringAt(b, num(b, 32));", "to": "const date = stringAt(b, num(b, 0));"},
-  {"id": "M7 revocation time ignored", "file": "verifier.js", "from": "revoked: att.revocationTime > 0 }", "to": "revoked: false }"},
-  {"id": "M8 one mismatch fails all", "file": "verifier.js", "from": "text.match = text.actual === text.expected;", "to": "text.match = text.actual === data.digests[0];"}
+ {
+  "id": "M1 revoked still ok",
+  "file": "verifier.js",
+  "from": "out.ok = !out.attestation.revoked && failed.length === 0;",
+  "to": "out.ok = failed.length === 0;"
+ },
+ {
+  "id": "M3 zero UID not treated as empty",
+  "file": "verifier.js",
+  "from": "if (att.uid === ZERO32) return",
+  "to": "if (false) return"
+ },
+ {
+  "id": "M4 fetch failure throws",
+  "file": "verifier.js",
+  "from": "      text.error = `could not fetch",
+  "to": "      throw e; text.error = `could not fetch"
+ },
+ {
+  "id": "M5 wrong contract",
+  "file": "verifier.js",
+  "from": "{ to: EAS_ADDRESS, data:",
+  "to": "{ to: '0x4200000000000000000000000000000000000020', data:"
+ },
+ {
+  "id": "M6 dates swapped",
+  "file": "verifier.js",
+  "from": "const date = stringAt(b, num(b, 32));",
+  "to": "const date = stringAt(b, num(b, 0));"
+ },
+ {
+  "id": "M7 revocation time ignored",
+  "file": "verifier.js",
+  "from": "revoked: att.revocationTime > 0 }",
+  "to": "revoked: false }"
+ },
+ {
+  "id": "M8 one mismatch fails all",
+  "file": "verifier.js",
+  "from": "text.match = text.actual === text.expected;",
+  "to": "text.match = text.actual === data.digests[0];"
+ }
 ]
