@@ -1,0 +1,25 @@
+{
+  "name": "charter-verifier",
+  "version": "0.1.0",
+  "description": "Static page that proves the Founding Charter attested on EAS (Base, Base Sepolia) matches its published IPFS texts",
+  "main": "verifier.js",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "mutation": "node scripts/mutation-check.mjs",
+    "test:live": "CHARTER_LIVE=1 node --test test/*.test.js"
+  },
+  "keywords": [],
+  "author": "Astra Trading Co",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "viem": "^2.57.13"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/astra-tc/charter-verifier"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

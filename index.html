@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Founding Charter verifier</title>
+<style>
+  :root { --bg: #fbf7f1; --surface: #ffffff; --text: #1f1d1b; --muted: #5d5750; --ok: #1d6b3a; --bad: #a3261b; --border: #ddd3c6; --primary: #a4492a; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #171514; --surface: #221f1d; --text: #f3ede6; --muted: #b9afa4; --ok: #6fd08f; --bad: #ff8a7a; --border: #3a3430; --primary: #e08a63; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.5 system-ui, sans-serif; background: var(--bg); color: var(--text); }
+  main { max-width: 760px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 1.4rem; margin: 8px 0 4px; }
+  p.lead { color: var(--muted); margin-top: 0; }
+  form { display: grid; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+  label { display: grid; gap: 4px; font-weight: 600; font-size: 0.9rem; }
+  input, select, button { font: inherit; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); width: 100%; min-width: 0; }
+  button { background: var(--primary); color: #fff; border: 0; font-weight: 700; cursor: pointer; }
+  #result { margin-top: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 10px; overflow-wrap: anywhere; }
+  .ok { color: var(--ok); font-weight: 700; } .bad { color: var(--bad); font-weight: 700; }
+  code { font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Founding Charter verifier</h1>
+  <p class="lead">Reads the Charter attestation from EAS on Base, fetches every text from IPFS, recomputes its sha256 and shows match or mismatch per text. No wallet, no key.</p>
+  <form id="f">
+    <label for="uid">Attestation UID
+      <input id="uid" name="uid" placeholder="0x..." autocomplete="off" required pattern="0x[0-9a-fA-F]{64}">
+    </label>
+    <label for="network">Network
+      <select id="network" name="network">
+        <option value="base">Base (8453)</option>
+        <option value="base-sepolia">Base Sepolia (84532)</option>
+      </select>
+    </label>
+    <label for="rpc">RPC URL
+      <input id="rpc" name="rpc" type="url">
+    </label>
+    <label for="gateway">IPFS gateway
+      <input id="gateway" name="gateway" type="url" value="https://ipfs.io/ipfs/">
+    </label>
+    <button type="submit">Verify</button>
+  </form>
+  <div id="result" aria-live="polite"></div>
+</main>
+<script type="module">
+  import { verifyCharter, httpRpc, gatewayIpfs, NETWORKS } from './verifier.js';
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const setRpc = () => { $('rpc').value = NETWORKS[$('network').value].rpc; };
+  $('network').addEventListener('change', setRpc); setRpc();
+  const q = new URLSearchParams(location.search);
+  if (q.get('network') && NETWORKS[q.get('network')]) { $('network').value = q.get('network'); setRpc(); }
+  if (q.get('uid')) $('uid').value = q.get('uid');
+  $('f').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    $('result').innerHTML = '<div class="card">Verifying...</div>';
+    const r = await verifyCharter({ uid: $('uid').value.trim(), network: $('network').value, rpc: httpRpc($('rpc').value), ipfs: gatewayIpfs($('gateway').value) });
+    const a = r.attestation;
+    let html = `<div class="card"><div class="${r.ok ? 'ok' : 'bad'}">${r.ok ? 'Verified: every text matches' : 'Not verified'}</div>${r.reason ? `<div>${esc(r.reason)}</div>` : ''}` +
+      (a.attester ? `<div>Attester <code>${esc(a.attester)}</code></div><div>Time ${new Date(a.time * 1000).toISOString().slice(0, 19).replace('T', ' ')} UTC${a.revoked ? ', <span class="bad">revoked</span>' : ''}</div>` : '') +
+      (r.version ? `<div>Version ${esc(r.version)}, date ${esc(r.date)}</div>` : '') + '</div>';
+    for (const t of r.texts) {
+      html += `<div class="card"><div class="${t.match ? 'ok' : 'bad'}">${esc(t.name)}: ${t.match ? 'match' : t.error ? 'could not fetch' : 'mismatch'}</div><div>CID <code>${esc(t.cid)}</code></div><div>Expected <code>${esc(t.expected)}</code></div><div>Actual <code>${esc(t.actual ?? 'none')}</code></div>${t.error ? `<div>${esc(t.error)}</div>` : ''}</div>`;
+    }
+    $('result').innerHTML = html;
+  });
+</script>
+</body>
+</html>
